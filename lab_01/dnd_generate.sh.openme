@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Запустить это как скрипт не получится, нужно всё выполнить руками
+
+python ./tools/player_gen.py
+
+winpty docker exec -it Post bash -c "psql -U postgres -d postgres"
+\i /mnt/init.sql
+\i /mnt/load_classes.sql
+\i /mnt/load_players.sql
+exit
+
+python ./tools/character_gen.py
+python ./tools/adventure_gen.py
+
+winpty docker exec -it Post bash -c "psql -U postgres -d postgres"
+\i /mnt/load_adventures.sql
+\i /mnt/load_characters.sql
+exit
+
+python ./tools/levelup_gen.py
+python ./tools/death_gen.py
+python ./tools/party_gen.py
+
+winpty docker exec -it Post bash -c "psql -U postgres -d postgres"
+\i /mnt/load_levels.sql
+\i /mnt/load_deaths.sql
+\i /mnt/load_party.sql
+exit
+
+rm ./*csv
